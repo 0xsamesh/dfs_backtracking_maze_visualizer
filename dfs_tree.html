@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DFS Tree Traversal Visualization</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #fbfbfd;
+            --bg-card: #ffffff;
+            --bg-accent: #f5f5f7;
+            --text-primary: #1d1d1f;
+            --text-secondary: #86868b;
+            --primary: #0071e3;
+            --primary-hover: #0077ed;
+            --accent-emerald: #34c759;
+            --accent-ruby: #ff3b30;
+            --accent-sapphire: #007aff;
+            --accent-amber: #ff9500;
+            --accent-purple: #af52de;
+            --accent-slate: #1c1c1e;
+            --card-shadow: 0 12px 30px rgba(0, 0, 0, 0.04);
+            --border-radius: 18px;
+            --font-main: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "Arial", sans-serif;
+            --transition-base: 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            --transition-fast: 0.2s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background: var(--bg-main);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        header h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            letter-spacing: -0.015em;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: opacity 0.2s;
+        }
+
+        .back-link:hover {
+            opacity: 0.7;
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        .panel {
+            background: var(--bg-card);
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            padding: 2rem;
+            border: 1px solid rgba(0, 0, 0, 0.02);
+        }
+
+        .panel h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1.2rem;
+        }
+
+        /* Tree Canvas */
+        .tree-canvas-wrapper {
+            position: relative;
+            overflow: hidden;
+        }
+
+        #tree-canvas {
+            width: 100%;
+            height: 520px;
+            display: block;
+        }
+
+        /* Controls */
+        .controls-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .btn {
+            height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 1.2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            background: var(--bg-accent);
+            color: var(--text-primary);
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            white-space: nowrap;
+            gap: 0.5rem;
+        }
+
+        .btn:hover:not(:disabled) {
+            background: #e8e8ed;
+        }
+
+        .btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: var(--primary-hover);
+        }
+
+        .btn-success {
+            background: var(--accent-emerald);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--accent-ruby);
+            color: white;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 0.6rem;
+        }
+
+        .btn-row .btn {
+            flex: 1;
+        }
+
+        select,
+        input[type="range"] {
+            width: 100%;
+            background: var(--bg-accent);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            padding: 0.7rem;
+            outline: none;
+            transition: all var(--transition-fast);
+            font-size: 0.9rem;
+        }
+
+        select:focus,
+        input:focus {
+            border-color: var(--primary);
+            background: white;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .control-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .speed-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        /* Traversal Log */
+        .traversal-log {
+            background: var(--bg-accent);
+            border-radius: 12px;
+            padding: 1rem;
+            height: 200px;
+            overflow-y: auto;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 0.8rem;
+            line-height: 1.6;
+        }
+
+        .log-entry {
+            padding: 0.2rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .log-visit {
+            color: var(--accent-purple);
+        }
+
+        .log-backtrack {
+            color: var(--accent-ruby);
+        }
+
+        .log-found {
+            color: var(--accent-emerald);
+            font-weight: 700;
+        }
+
+        .log-badge {
+            display: inline-block;
+            padding: 0.1rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .log-badge.visit {
+            background: var(--accent-purple);
+        }
+
+        .log-badge.backtrack {
+            background: var(--accent-ruby);
+        }
+
+        .log-badge.found {
+            background: var(--accent-emerald);
+        }
+
+        /* Stack Panel */
+        .stack-display {
+            background: var(--bg-accent);
+            border-radius: 12px;
+            padding: 1rem;
+            min-height: 60px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .stack-chip {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.3rem 0.6rem;
+            background: var(--primary);
+            color: white;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin: 0.15rem;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        }
+
+        .stack-chip.top {
+            background: var(--accent-amber);
+            color: #000;
+        }
+
+        .empty-state {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        /* Legend */
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--bg-accent);
+            border-radius: 12px;
+            margin-top: 1.5rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .legend-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+        }
+
+        /* Bottom Panels */
+        .bottom-panels {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 1000px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .bottom-panels {
+                grid-template-columns: 1fr;
+            }
+
+            header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Maze Solver</a>
+
+        <header>
+            <h1>DFS on Trees</h1>
+            <p class="subtitle">Watch Depth-First Search explore a tree — one branch at a time</p>
+        </header>
+
+        <div class="main-layout">
+            <!-- Tree Canvas -->
+            <div class="panel tree-canvas-wrapper">
+                <canvas id="tree-canvas"></canvas>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background:#d1d5db;"></div> Unvisited
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background:#fbbf24;"></div> Current
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background:#7c3aed;"></div> Visited
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background:#ef4444;"></div> Backtracked
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background:#34c759;"></div> Found
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="controls-stack">
+                <div class="panel">
+                    <h3><i class="fas fa-play-circle"></i> Controls</h3>
+                    <div class="btn-row" style="margin-bottom: 0.8rem;">
+                        <button id="start-btn" class="btn btn-primary"><i class="fas fa-play"></i> Start</button>
+                        <button id="step-btn" class="btn"><i class="fas fa-step-forward"></i> Step</button>
+                    </div>
+                    <div class="btn-row" style="margin-bottom: 1rem;">
+                        <button id="reset-btn" class="btn btn-danger"><i class="fas fa-redo"></i> Reset</button>
+                        <button id="new-tree-btn" class="btn"><i class="fas fa-plus"></i> New Tree</button>
+                    </div>
+
+                    <div class="control-group" style="margin-bottom: 1rem;">
+                        <label>Tree Preset</label>
+                        <select id="tree-preset">
+                            <option value="backtracking-demo" selected>⭐ Backtracking Demo (A→F)</option>
+                            <option value="binary">Binary Tree (7 nodes)</option>
+                            <option value="binary-large">Binary Tree (15 nodes)</option>
+                            <option value="unbalanced">Unbalanced Tree</option>
+                            <option value="deep">Deep / Skewed Tree</option>
+                            <option value="wide">Wide Tree</option>
+                            <option value="random">Random Tree</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group" style="margin-bottom: 1rem;">
+                        <label>Search For Node</label>
+                        <select id="target-node">
+                            <option value="none">No target (explore all)</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Animation Speed</label>
+                        <input type="range" id="speed-slider" min="1" max="10" value="5">
+                        <div class="speed-labels"><span>Slow</span><span>Fast</span></div>
+                    </div>
+                </div>
+
+                <!-- Stack -->
+                <div class="panel">
+                    <h3><i class="fas fa-layer-group"></i> Call Stack</h3>
+                    <div id="stack-display" class="stack-display">
+                        <p class="empty-state">Stack is empty</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom: Log + Info -->
+        <div class="bottom-panels">
+            <div class="panel">
+                <h3><i class="fas fa-list"></i> Traversal Log</h3>
+                <div id="traversal-log" class="traversal-log">
+                    <p class="empty-state">Click Start or Step to begin</p>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h3><i class="fas fa-info-circle"></i> How DFS Works on Trees</h3>
+                <div style="font-size:0.9rem; line-height:1.6; color: var(--text-secondary);">
+                    <p><strong>1.</strong> Start at the <strong>root</strong> node.</p>
+                    <p style="margin-top:0.5rem;"><strong>2.</strong> Visit the node and push it onto the <strong>call
+                            stack</strong>.</p>
+                    <p style="margin-top:0.5rem;"><strong>3.</strong> Go to the <strong>leftmost unvisited
+                            child</strong> — dive deep.</p>
+                    <p style="margin-top:0.5rem;"><strong>4.</strong> If no children left → <strong>backtrack</strong>
+                        (pop from stack).</p>
+                    <p style="margin-top:0.5rem;"><strong>5.</strong> Repeat until all nodes are visited or the target
+                        is found.</p>
+                    <p style="margin-top:1rem; font-weight:600; color: var(--text-primary);">
+                        Key: DFS goes as <span style="color:var(--accent-purple);">DEEP</span> as possible
+                        before going <span style="color:var(--accent-sapphire);">WIDE</span>.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Annotated DFS Concept Diagram -->
+        <div class="panel" style="margin-top: 2rem; padding: 2.5rem;">
+            <h3 style="text-align:center; font-size: 1.5rem; margin-bottom: 0.3rem;">
+                <i class="fas fa-sitemap"></i> Backtracking Applied in Search Tree
+            </h3>
+            <p style="text-align:center; color: var(--text-secondary); margin-bottom: 2rem; font-size: 0.95rem;">
+                How DFS dives deep, hits dead ends, and backtracks to find the solution
+            </p>
+
+            <svg viewBox="0 0 900 520" xmlns="http://www.w3.org/2000/svg"
+                style="width:100%; max-width:900px; margin:0 auto; display:block;"
+                font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif">
+
+                <!-- ============ EDGES (draw first, behind nodes) ============ -->
+                <!-- Root to children -->
+                <line x1="450" y1="65" x2="220" y2="145" stroke="#c4c4c8" stroke-width="2.5" />
+                <line x1="450" y1="65" x2="680" y2="145" stroke="#c4c4c8" stroke-width="2.5" />
+
+                <!-- A's children -->
+                <line x1="220" y1="165" x2="140" y2="245" stroke="#c4c4c8" stroke-width="2.5" />
+                <line x1="220" y1="165" x2="300" y2="245" stroke="#c4c4c8" stroke-width="2.5" />
+
+                <!-- B's children -->
+                <line x1="140" y1="265" x2="80" y2="345" stroke="#c4c4c8" stroke-width="2.5" />
+                <line x1="140" y1="265" x2="200" y2="345" stroke="#c4c4c8" stroke-width="2.5" />
+                <line x1="140" y1="265" x2="300" y2="345" stroke="#c4c4c8" stroke-width="2.5" />
+
+                <!-- Right subtree edges -->
+                <line x1="680" y1="165" x2="600" y2="245" stroke="#c4c4c8" stroke-width="2.5" />
+                <line x1="680" y1="165" x2="760" y2="245" stroke="#c4c4c8" stroke-width="2.5" />
+
+                <!-- Right-Right children -->
+                <line x1="600" y1="265" x2="560" y2="345" stroke="#c4c4c8" stroke-width="2.5" />
+                <line x1="600" y1="265" x2="640" y2="345" stroke="#c4c4c8" stroke-width="2.5" />
+                <line x1="760" y1="265" x2="720" y2="345" stroke="#c4c4c8" stroke-width="2.5" />
+                <line x1="760" y1="265" x2="800" y2="345" stroke="#c4c4c8" stroke-width="2.5" />
+
+                <!-- ============ DIVING ARROWS (orange, thick) ============ -->
+                <!-- Root → A -->
+                <defs>
+                    <marker id="arrow-orange" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8"
+                        orient="auto-start-reverse">
+                        <path d="M 0 0 L 10 5 L 0 10 z" fill="#e97a1f" />
+                    </marker>
+                    <marker id="arrow-purple" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8"
+                        orient="auto-start-reverse">
+                        <path d="M 0 0 L 10 5 L 0 10 z" fill="#7c3aed" />
+                    </marker>
+                    <marker id="arrow-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8"
+                        orient="auto-start-reverse">
+                        <path d="M 0 0 L 10 5 L 0 10 z" fill="#16a34a" />
+                    </marker>
+                </defs>
+
+                <!-- Diving path: alongside the edges -->
+                <path d="M 430,80 L 205,140" stroke="#e97a1f" stroke-width="3.5" fill="none"
+                    marker-end="url(#arrow-orange)" />
+                <path d="M 205,175 L 128,240" stroke="#e97a1f" stroke-width="3.5" fill="none"
+                    marker-end="url(#arrow-orange)" />
+                <path d="M 125,275 L 72,340" stroke="#e97a1f" stroke-width="3.5" fill="none"
+                    marker-end="url(#arrow-orange)" />
+
+                <!-- DIVING label -->
+                <text x="168" y="105" fill="#e97a1f" font-weight="800" font-size="16"
+                    transform="rotate(-18, 168, 105)">DIVING</text>
+                <text x="100" y="202" fill="#e97a1f" font-weight="800" font-size="14"
+                    transform="rotate(-30, 100, 202)">DIVING</text>
+
+                <!-- ============ BACKTRACK ARROWS (purple dashed) ============ -->
+                <!-- D → C → B (backtracking up) -->
+                <path d="M 68,370 C 30,370 20,320 30,290 C 40,260 80,250 100,248" stroke="#7c3aed" stroke-width="3"
+                    stroke-dasharray="8 5" fill="none" marker-end="url(#arrow-purple)" />
+                <path d="M 115,240 C 80,220 60,200 80,180 C 95,165 115,162 125,160" stroke="#7c3aed" stroke-width="3"
+                    stroke-dasharray="8 5" fill="none" marker-end="url(#arrow-purple)" />
+
+                <!-- BACKTRACKING label -->
+                <text x="25" y="290" fill="#7c3aed" font-weight="800" font-size="13">BACKTRACKING</text>
+
+                <!-- ============ NEXT CHOICE arrow (green) ============ -->
+                <!-- B → F (after backtracking, try next child) -->
+                <path d="M 155,270 L 285,340" stroke="#16a34a" stroke-width="3.5" fill="none"
+                    marker-end="url(#arrow-green)" />
+
+                <!-- NEXT CHOICE label -->
+                <text x="230" y="295" fill="#16a34a" font-weight="800" font-size="14">NEXT</text>
+                <text x="222" y="312" fill="#16a34a" font-weight="800" font-size="14">CHOICE</text>
+
+                <!-- ============ NODES ============ -->
+                <!-- Root Node -->
+                <circle cx="450" cy="55" r="24" fill="white" stroke="#c4c4c8" stroke-width="2.5" />
+                <text x="450" y="42" text-anchor="middle" fill="#1d1d1f" font-weight="700" font-size="13">ROOT</text>
+                <text x="450" y="60" text-anchor="middle" fill="#1d1d1f" font-weight="700" font-size="13">NODE</text>
+
+                <!-- Node A (visited - purple) -->
+                <circle cx="220" cy="155" r="22" fill="#7c3aed" stroke="#6d28d9" stroke-width="2.5" />
+                <text x="220" y="160" text-anchor="middle" fill="white" font-weight="700" font-size="15">A</text>
+
+                <!-- Node B (decision point - purple with special border) -->
+                <circle cx="140" cy="255" r="22" fill="#7c3aed" stroke="#6d28d9" stroke-width="2.5" />
+                <text x="140" y="260" text-anchor="middle" fill="white" font-weight="700" font-size="15">B</text>
+                <!-- Decision point label -->
+                <text x="175" y="248" fill="#7c3aed" font-weight="800" font-size="12">← DECISION</text>
+                <text x="185" y="264" fill="#7c3aed" font-weight="800" font-size="12">POINT</text>
+
+                <!-- Node C (backtracked - red outline) -->
+                <circle cx="80" cy="355" r="22" fill="#fee2e2" stroke="#ef4444" stroke-width="2.5" />
+                <text x="80" y="360" text-anchor="middle" fill="#ef4444" font-weight="700" font-size="15">C</text>
+
+                <!-- Node D (dead end - red) -->
+                <circle cx="80" cy="435" r="22" fill="#fee2e2" stroke="#ef4444" stroke-width="2.5" />
+                <text x="80" y="440" text-anchor="middle" fill="#ef4444" font-weight="700" font-size="15">D</text>
+                <line x1="80" y1="355" x2="80" y2="435" stroke="#c4c4c8" stroke-width="2.5" stroke-dasharray="6 4" />
+
+                <!-- Dead End X -->
+                <text x="80" y="485" text-anchor="middle" fill="#ef4444" font-weight="700" font-size="13">Dead</text>
+                <text x="80" y="500" text-anchor="middle" fill="#ef4444" font-weight="700" font-size="13">End</text>
+                <circle cx="80" cy="513" r="10" fill="#ef4444" />
+                <text x="80" y="518" text-anchor="middle" fill="white" font-weight="900" font-size="14">✕</text>
+
+                <!-- Node E (unvisited) -->
+                <circle cx="200" cy="355" r="22" fill="white" stroke="#c4c4c8" stroke-width="2.5" />
+                <text x="200" y="360" text-anchor="middle" fill="#6b7280" font-weight="700" font-size="15">E</text>
+
+                <!-- Node F (SOLUTION - green) -->
+                <circle cx="300" cy="355" r="24" fill="#34c759" stroke="#16a34a" stroke-width="3" />
+                <text x="300" y="360" text-anchor="middle" fill="white" font-weight="700" font-size="16">F</text>
+                <!-- Solution label -->
+                <text x="300" y="400" text-anchor="middle" fill="#16a34a" font-weight="800"
+                    font-size="13">SOLUTION</text>
+                <text x="300" y="416" text-anchor="middle" fill="#16a34a" font-weight="800" font-size="13">NODE</text>
+
+                <!-- Right subtree node (unvisited) -->
+                <circle cx="680" cy="155" r="22" fill="white" stroke="#c4c4c8" stroke-width="2.5" />
+                <circle cx="600" cy="255" r="22" fill="white" stroke="#c4c4c8" stroke-width="2.5" />
+                <circle cx="760" cy="255" r="22" fill="white" stroke="#c4c4c8" stroke-width="2.5" />
+                <circle cx="560" cy="355" r="22" fill="white" stroke="#c4c4c8" stroke-width="2.5" />
+                <text x="560" y="360" text-anchor="middle" fill="#6b7280" font-weight="700" font-size="15">G</text>
+                <circle cx="640" cy="355" r="22" fill="white" stroke="#c4c4c8" stroke-width="2.5" />
+                <text x="640" y="360" text-anchor="middle" fill="#6b7280" font-weight="700" font-size="15">H</text>
+                <circle cx="720" cy="355" r="22" fill="white" stroke="#c4c4c8" stroke-width="2.5" />
+                <text x="720" y="360" text-anchor="middle" fill="#6b7280" font-weight="700" font-size="15">I</text>
+                <circle cx="800" cy="355" r="22" fill="white" stroke="#c4c4c8" stroke-width="2.5" />
+                <text x="800" y="360" text-anchor="middle" fill="#6b7280" font-weight="700" font-size="15">J</text>
+
+                <!-- Node A (right child, unvisited) -->
+                <circle cx="300" cy="255" r="22" fill="white" stroke="#c4c4c8" stroke-width="2.5" />
+
+                <!-- Path labels at bottom -->
+                <text x="140" y="400" text-anchor="middle" fill="#86868b" font-size="12" font-weight="600">Path 1</text>
+                <text x="600" y="400" text-anchor="middle" fill="#86868b" font-size="12" font-weight="600">Path 1</text>
+                <text x="760" y="400" text-anchor="middle" fill="#86868b" font-size="12" font-weight="600">Path 2</text>
+
+            </svg>
+        </div>
+    </div>
+
+    <script>
+        // ─── Tree Node ──────────────────────────────────────────────
+        class TreeNode {
+            constructor(value, x = 0, y = 0) {
+                this.id = null; // Assigned during collection
+                this.value = value;
+                this.children = [];
+                this.x = x;
+                this.y = y;
+                this.state = 'unvisited'; // unvisited, current, visited, backtracked, found
+            }
+        }
+
+        // ─── Tree Presets ───────────────────────────────────────────
+        function buildBinaryTree() {
+            const nodes = [];
+            for (let i = 1; i <= 7; i++) nodes.push(new TreeNode(i));
+            nodes[0].children = [nodes[1], nodes[2]];
+            nodes[1].children = [nodes[3], nodes[4]];
+            nodes[2].children = [nodes[5], nodes[6]];
+            return nodes[0];
+        }
+
+        function buildBinaryLargeTree() {
+            const nodes = [];
+            for (let i = 1; i <= 15; i++) nodes.push(new TreeNode(i));
+            nodes[0].children = [nodes[1], nodes[2]];
+            nodes[1].children = [nodes[3], nodes[4]];
+            nodes[2].children = [nodes[5], nodes[6]];
+            nodes[3].children = [nodes[7], nodes[8]];
+            nodes[4].children = [nodes[9], nodes[10]];
+            nodes[5].children = [nodes[11], nodes[12]];
+            nodes[6].children = [nodes[13], nodes[14]];
+            return nodes[0];
+        }
+
+        function buildUnbalancedTree() {
+            const nodes = [];
+            for (let i = 1; i <= 9; i++) nodes.push(new TreeNode(i));
+            nodes[0].children = [nodes[1], nodes[2]];
+            nodes[1].children = [nodes[3], nodes[4], nodes[5]];
+            nodes[3].children = [nodes[6], nodes[7]];
+            nodes[2].children = [nodes[8]];
+            return nodes[0];
+        }
+
+        function buildDeepTree() {
+            const nodes = [];
+            for (let i = 1; i <= 8; i++) nodes.push(new TreeNode(i));
+            nodes[0].children = [nodes[1], nodes[6]];
+            nodes[1].children = [nodes[2]];
+            nodes[2].children = [nodes[3]];
+            nodes[3].children = [nodes[4]];
+            nodes[4].children = [nodes[5]];
+            nodes[6].children = [nodes[7]];
+            return nodes[0];
+        }
+
+        function buildWideTree() {
+            const nodes = [];
+            for (let i = 1; i <= 11; i++) nodes.push(new TreeNode(i));
+            nodes[0].children = [nodes[1], nodes[2], nodes[3], nodes[4]];
+            nodes[1].children = [nodes[5], nodes[6]];
+            nodes[3].children = [nodes[7], nodes[8]];
+            nodes[4].children = [nodes[9], nodes[10]];
+            return nodes[0];
+        }
+
+        function buildRandomTree() {
+            const count = 8 + Math.floor(Math.random() * 7); // 8-14 nodes
+            const nodes = [];
+            for (let i = 1; i <= count; i++) nodes.push(new TreeNode(i));
+            for (let i = 1; i < count; i++) {
+                const parentIdx = Math.floor(Math.random() * i);
+                if (nodes[parentIdx].children.length < 3) {
+                    nodes[parentIdx].children.push(nodes[i]);
+                } else {
+                    // Find another parent
+                    for (let j = 0; j < i; j++) {
+                        if (nodes[j].children.length < 3) {
+                            nodes[j].children.push(nodes[i]);
+                            break;
+                        }
+                    }
+                }
+            }
+            return nodes[0];
+        }
+
+        // ─── Backtracking Demo Tree (matches the annotated diagram) ─
+        function buildBacktrackingDemoTree() {
+            // Nodes with letter labels matching the diagram
+            const root = new TreeNode('Root');
+            const a = new TreeNode('A');
+            const b = new TreeNode('B');
+            const c = new TreeNode('C');
+            const d = new TreeNode('D');
+            const e = new TreeNode('E');
+            const f = new TreeNode('F');
+            const g = new TreeNode('G');
+            const h = new TreeNode('H');
+            const i = new TreeNode('I');
+            const j = new TreeNode('J');
+
+            // Unlabeled intermediate nodes from diagram
+            const aRight = new TreeNode('');
+            const bRight = new TreeNode('');
+            const bRightLeft = new TreeNode('');
+
+            const r1 = new TreeNode(''); // right child of root
+
+            // Build the exact tree from the diagram:
+            // Root → [A, R]
+            root.children = [a, r1];
+
+            // A → [B, unlabeled]
+            a.children = [b, aRight];
+
+            // B → [C, unlabeled]  (B is the DECISION POINT)
+            b.children = [c, bRight];
+
+            // C → [D, E]  (D is the DEAD END)
+            c.children = [d, e];
+
+            // Unlabeled child of B → [unlabeled, F]
+            bRight.children = [bRightLeft, f];
+
+            // Right subtree
+            const r1Left = new TreeNode('');
+            const r1Right = new TreeNode('');
+            r1.children = [r1Left, r1Right];
+            r1Left.children = [g, h];
+            r1Right.children = [i, j];
+
+            return root;
+        }
+
+        // ─── Layout: position nodes on canvas ───────────────────────
+        function layoutTree(root, canvasWidth, canvasHeight) {
+            // Count leaves to determine spacing
+            function countLeaves(node) {
+                if (node.children.length === 0) return 1;
+                return node.children.reduce((s, c) => s + countLeaves(c), 0);
+            }
+
+            function getDepth(node) {
+                if (node.children.length === 0) return 1;
+                return 1 + Math.max(...node.children.map(getDepth));
+            }
+
+            const totalLeaves = countLeaves(root);
+            const depth = getDepth(root);
+
+            const paddingX = 50;
+            const paddingY = 60;
+            const usableW = canvasWidth - paddingX * 2;
+            const usableH = canvasHeight - paddingY * 2;
+
+            let leafIndex = 0;
+
+            function assignPositions(node, depthLevel) {
+                if (node.children.length === 0) {
+                    node.x = paddingX + (leafIndex + 0.5) * (usableW / totalLeaves);
+                    node.y = paddingY + depthLevel * (usableH / (depth - 1 || 1));
+                    leafIndex++;
+                    return;
+                }
+
+                for (const child of node.children) {
+                    assignPositions(child, depthLevel + 1);
+                }
+
+                // Center parent over children
+                const firstChild = node.children[0];
+                const lastChild = node.children[node.children.length - 1];
+                node.x = (firstChild.x + lastChild.x) / 2;
+                node.y = paddingY + depthLevel * (usableH / (depth - 1 || 1));
+            }
+
+            assignPositions(root, 0);
+        }
+
+        // ─── Main App ───────────────────────────────────────────────
+        class DFSTreeVisualizer {
+            constructor() {
+                this.canvas = document.getElementById('tree-canvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.speed = 600;
+                this.isRunning = false;
+                this.steps = [];
+                this.currentStepIndex = 0;
+                this.root = null;
+                this.allNodes = [];
+                this.targetValue = null;
+                this.stack = [];
+
+                this.setupCanvas();
+                this.setupListeners();
+                this.loadPreset('backtracking-demo');
+            }
+
+            setupCanvas() {
+                const rect = this.canvas.parentElement.getBoundingClientRect();
+                const dpr = window.devicePixelRatio || 1;
+                this.canvas.width = rect.width * dpr;
+                this.canvas.height = 520 * dpr;
+                this.canvas.style.width = rect.width + 'px';
+                this.canvas.style.height = '520px';
+                this.ctx.scale(dpr, dpr);
+                this.displayWidth = rect.width;
+                this.displayHeight = 520;
+            }
+
+            setupListeners() {
+                document.getElementById('start-btn').addEventListener('click', () => this.startDFS());
+                document.getElementById('step-btn').addEventListener('click', () => this.stepDFS());
+                document.getElementById('reset-btn').addEventListener('click', () => this.reset());
+                document.getElementById('new-tree-btn').addEventListener('click', () => {
+                    this.loadPreset(document.getElementById('tree-preset').value);
+                });
+
+                document.getElementById('tree-preset').addEventListener('change', (e) => {
+                    this.loadPreset(e.target.value);
+                });
+
+                document.getElementById('target-node').addEventListener('change', (e) => {
+                    if (e.target.value === 'none') {
+                        this.targetValue = null;
+                    } else {
+                        const val = parseInt(e.target.value);
+                        this.targetValue = isNaN(val) ? e.target.value : val;
+                    }
+                    this.reset();
+                });
+
+                document.getElementById('speed-slider').addEventListener('input', (e) => {
+                    this.speed = 1100 - parseInt(e.target.value) * 100;
+                });
+
+                window.addEventListener('resize', () => {
+                    this.setupCanvas();
+                    if (this.root) {
+                        layoutTree(this.root, this.displayWidth, this.displayHeight);
+                        this.draw();
+                    }
+                });
+            }
+
+            loadPreset(type) {
+                const builders = {
+                    'backtracking-demo': buildBacktrackingDemoTree,
+                    'binary': buildBinaryTree,
+                    'binary-large': buildBinaryLargeTree,
+                    'unbalanced': buildUnbalancedTree,
+                    'deep': buildDeepTree,
+                    'wide': buildWideTree,
+                    'random': buildRandomTree
+                };
+
+                this.root = (builders[type] || buildBacktrackingDemoTree)();
+                this.setupCanvas();
+                layoutTree(this.root, this.displayWidth, this.displayHeight);
+                this.collectNodes();
+                this.populateTargetSelect();
+
+                // Auto-select F as target for the backtracking demo
+                if (type === 'backtracking-demo') {
+                    const targetSelect = document.getElementById('target-node');
+                    targetSelect.value = 'F';
+                    this.targetValue = 'F';
+                }
+
+                this.reset();
+            }
+
+            collectNodes() {
+                this.allNodes = [];
+                let nextId = 0;
+                const queue = [this.root];
+                while (queue.length) {
+                    const node = queue.shift();
+                    node.id = nextId++;
+                    this.allNodes.push(node);
+                    queue.push(...node.children);
+                }
+            }
+
+            populateTargetSelect() {
+                const select = document.getElementById('target-node');
+                select.innerHTML = '<option value="none">No target (explore all)</option>';
+                for (const node of this.allNodes) {
+                    const opt = document.createElement('option');
+                    opt.value = node.value;
+                    opt.textContent = `Node ${node.value}`;
+                    select.appendChild(opt);
+                }
+                this.targetValue = null;
+            }
+
+            reset() {
+                this.isRunning = false;
+                this.steps = [];
+                this.currentStepIndex = 0;
+                this.stack = [];
+
+                for (const node of this.allNodes) {
+                    node.state = 'unvisited';
+                }
+
+                document.getElementById('traversal-log').innerHTML = '<p class="empty-state">Click Start or Step to begin</p>';
+                document.getElementById('stack-display').innerHTML = '<p class="empty-state">Stack is empty</p>';
+                document.getElementById('start-btn').disabled = false;
+                document.getElementById('step-btn').disabled = false;
+
+                this.draw();
+            }
+
+            // Generate all DFS steps upfront
+            generateSteps() {
+                this.steps = [];
+                this.dfsGenerate(this.root);
+            }
+
+            dfsGenerate(node) {
+                this.steps.push({ type: 'visit', node });
+
+                if (this.targetValue !== null && node.value === this.targetValue) {
+                    this.steps.push({ type: 'found', node });
+                    return true;
+                }
+
+                for (let i = 0; i < node.children.length; i++) {
+                    const child = node.children[i];
+                    if (this.dfsGenerate(child)) return true;
+
+                    // After exploring a child, if we didn't find the target and this child wasn't the last one
+                    // we need to visually show "returning" to this node before the next loop
+                    // or if it WAS the last child, we will backtrack from THIS node in the next step anyway
+                    this.steps.push({ type: 'return', node });
+                }
+
+                this.steps.push({ type: 'backtrack', node });
+
+                return false;
+            }
+
+            async startDFS() {
+                if (this.isRunning) return;
+
+                if (this.currentStepIndex === 0) {
+                    this.reset();
+                    this.generateSteps();
+                }
+
+                this.isRunning = true;
+                document.getElementById('start-btn').disabled = true;
+
+                while (this.currentStepIndex < this.steps.length && this.isRunning) {
+                    this.executeStep(this.steps[this.currentStepIndex]);
+                    this.currentStepIndex++;
+                    this.draw();
+                    await this.sleep(this.speed);
+
+                    // Stop if we found the target
+                    if (this.currentStepIndex > 0 && this.steps[this.currentStepIndex - 1].type === 'found') break;
+                }
+
+                this.isRunning = false;
+                document.getElementById('start-btn').disabled = false;
+
+                if (this.currentStepIndex >= this.steps.length) {
+                    this.addLog('✅ DFS Complete — all nodes explored', 'found');
+                }
+            }
+
+            stepDFS() {
+                if (this.isRunning) return;
+
+                if (this.currentStepIndex === 0) {
+                    this.reset();
+                    this.generateSteps();
+                }
+
+                if (this.currentStepIndex < this.steps.length) {
+                    this.executeStep(this.steps[this.currentStepIndex]);
+                    this.currentStepIndex++;
+                    this.draw();
+                }
+
+                if (this.currentStepIndex >= this.steps.length) {
+                    this.addLog('✅ DFS Complete', 'found');
+                }
+            }
+
+            executeStep(step) {
+                const { type, node } = step;
+
+                if (type === 'visit') {
+                    // Unmark previous current
+                    for (const n of this.allNodes) {
+                        if (n.state === 'current') n.state = 'visited';
+                    }
+                    node.state = 'current';
+                    this.stack.push(node); // Store node object instead of value
+                    const label = node.value === '' ? '(blank)' : node.value;
+                    this.addLog(`VISIT ${label} (Dive deeper)`, 'visit');
+
+                } else if (type === 'backtrack') {
+                    node.state = 'backtracked';
+                    // The node being backtracked from is at the top of the stack, so pop it
+                    if (this.stack.length > 0 && this.stack[this.stack.length - 1] === node) {
+                        this.stack.pop();
+                    }
+
+                    // The new "current" node is whatever is now on top of the stack
+                    for (const n of this.allNodes) {
+                        if (n.state === 'current') n.state = 'visited';
+                    }
+                    if (this.stack.length > 0) {
+                        const parentNode = this.stack[this.stack.length - 1];
+                        if (parentNode) parentNode.state = 'current';
+                    }
+
+                    const label = node.value === '' ? '(blank)' : node.value;
+                    this.addLog(`BACKTRACK from ${label} (Dead end / done)`, 'backtrack');
+
+                } else if (type === 'return') {
+                    // Update visual state to show we returned to this node
+                    for (const n of this.allNodes) {
+                        if (n.state === 'current') n.state = 'visited';
+                    }
+                    node.state = 'current';
+                    const label = node.value === '' ? '(blank)' : node.value;
+                    this.addLog(`RETURN to ${label} (Move up)`, 'return');
+
+                } else if (type === 'found') {
+                    node.state = 'found';
+                    this.addLog(`🎯 FOUND target node ${node.value}!`, 'found');
+                }
+
+                this.updateStackDisplay();
+            }
+
+            addLog(text, type) {
+                const log = document.getElementById('traversal-log');
+                if (log.querySelector('.empty-state')) log.innerHTML = '';
+
+                const entry = document.createElement('div');
+                entry.className = `log-entry log-${type}`;
+
+                const badge = document.createElement('span');
+                badge.className = `log-badge ${type}`;
+                badge.textContent = type === 'visit' ? 'VISIT' : type === 'backtrack' ? 'BACK' : type === 'found' ? 'FOUND' : 'RET';
+
+                const span = document.createElement('span');
+                span.textContent = text;
+
+                entry.appendChild(badge);
+                entry.appendChild(span);
+                log.appendChild(entry);
+                log.scrollTop = log.scrollHeight;
+            }
+
+            updateStackDisplay() {
+                const display = document.getElementById('stack-display');
+                if (this.stack.length === 0) {
+                    display.innerHTML = '<p class="empty-state">Stack is empty</p>';
+                    return;
+                }
+
+                display.innerHTML = this.stack.map((node, i) => {
+                    const isTop = i === this.stack.length - 1;
+                    const label = node.value === '' ? '·' : node.value;
+                    return `<span class="stack-chip${isTop ? ' top' : ''}">${isTop ? '→ ' : ''}${label}</span>`;
+                }).join('');
+            }
+
+            // ─── Drawing ────────────────────────────────────────────
+            draw() {
+                const ctx = this.ctx;
+                ctx.clearRect(0, 0, this.displayWidth, this.displayHeight);
+
+                // Draw edges first
+                this.drawEdges(this.root);
+
+                // Draw nodes on top
+                this.drawNodes(this.root);
+            }
+
+            drawEdges(node) {
+                const ctx = this.ctx;
+                for (const child of node.children) {
+                    ctx.beginPath();
+                    ctx.moveTo(node.x, node.y);
+                    ctx.lineTo(child.x, child.y);
+
+                    // Color edge based on child state
+                    if (child.state === 'unvisited') {
+                        ctx.strokeStyle = '#d1d5db';
+                        ctx.lineWidth = 2;
+                    } else if (child.state === 'found') {
+                        ctx.strokeStyle = '#34c759';
+                        ctx.lineWidth = 3;
+                    } else {
+                        ctx.strokeStyle = '#7c3aed';
+                        ctx.lineWidth = 2.5;
+                    }
+                    ctx.stroke();
+
+                    this.drawEdges(child);
+                }
+            }
+
+            drawNodes(node) {
+                const ctx = this.ctx;
+
+                // Draw children first (so parent labels are on top if overlapping)
+                for (const child of node.children) {
+                    this.drawNodes(child);
+                }
+
+                const r = 22;
+                const colors = {
+                    unvisited: { fill: '#e5e7eb', stroke: '#d1d5db', text: '#6b7280' },
+                    current: { fill: '#fbbf24', stroke: '#f59e0b', text: '#000' },
+                    visited: { fill: '#7c3aed', stroke: '#6d28d9', text: '#fff' },
+                    backtracked: { fill: '#fee2e2', stroke: '#ef4444', text: '#ef4444' },
+                    found: { fill: '#34c759', stroke: '#16a34a', text: '#fff' }
+                };
+
+                const c = colors[node.state] || colors.unvisited;
+
+                // Shadow for current node
+                if (node.state === 'current') {
+                    ctx.shadowColor = 'rgba(251, 191, 36, 0.5)';
+                    ctx.shadowBlur = 18;
+                }
+
+                // Circle
+                ctx.beginPath();
+                ctx.arc(node.x, node.y, r, 0, Math.PI * 2);
+                ctx.fillStyle = c.fill;
+                ctx.fill();
+                ctx.strokeStyle = c.stroke;
+                ctx.lineWidth = 2.5;
+                ctx.stroke();
+
+                ctx.shadowColor = 'transparent';
+                ctx.shadowBlur = 0;
+
+                // Label
+                ctx.fillStyle = c.text;
+                ctx.font = 'bold 14px -apple-system, BlinkMacSystemFont, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(node.value, node.x, node.y);
+            }
+
+            sleep(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            new DFSTreeVisualizer();
+        });
+    </script>
+</body>
+
+</html>

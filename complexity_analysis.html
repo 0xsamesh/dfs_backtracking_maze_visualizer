@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DFS Complexity Analysis - Presentation</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #fbfbfd;
+            --bg-card: #ffffff;
+            --bg-accent: #f5f5f7;
+            --text-primary: #1d1d1f;
+            --text-secondary: #86868b;
+            --primary: #0071e3;
+            --primary-hover: #0077ed;
+            --accent-emerald: #34c759;
+            --accent-ruby: #ff3b30;
+            --accent-purple: #af52de;
+            --accent-amber: #ff9500;
+            --card-shadow: 0 12px 30px rgba(0, 0, 0, 0.04);
+            --border-radius: 20px;
+            --font-main: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+            --transition: 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 5rem;
+        }
+
+        header h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #1d1d1f 0%, #434343 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-back {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            z-index: 100;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.8rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .btn-secondary {
+            background: rgba(0, 0, 0, 0.05);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3);
+        }
+
+        /* Hero Grid */
+        .complexity-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2.5rem;
+            margin-bottom: 5rem;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: var(--border-radius);
+            padding: 3rem;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(0, 0, 0, 0.02);
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+        }
+
+        .card h2 {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            margin-top: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .formula {
+            font-size: 4.5rem;
+            font-weight: 800;
+            margin: 1.5rem 0;
+            font-family: 'SF Mono', SFMono-Regular, ui-monospace, monospace;
+        }
+
+        .time-formula {
+            color: var(--accent-purple);
+        }
+
+        .space-formula {
+            color: var(--primary);
+        }
+
+        .description {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Cheat Sheet Section */
+        .cheat-sheet {
+            background: var(--text-primary);
+            color: white;
+            padding: 4rem;
+            border-radius: 30px;
+            margin-bottom: 5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cheat-sheet-content h2 {
+            font-size: 2.5rem;
+            margin: 0 0 1rem 0;
+            background: linear-gradient(135deg, #ffffff 0%, #a1a1a1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .cheat-sheet-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .cheat-sheet-list li {
+            font-size: 1.25rem;
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: #d2d2d7;
+        }
+
+        .cheat-sheet-list i {
+            color: var(--accent-emerald);
+        }
+
+        .cheat-sheet-visual {
+            font-size: 6rem;
+            opacity: 0.2;
+        }
+
+        /* Interactive Demo */
+        .demo-section {
+            background: var(--bg-card);
+            border-radius: 30px;
+            padding: 4rem;
+            box-shadow: var(--card-shadow);
+        }
+
+        .demo-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+        }
+
+        .demo-layout {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 4rem;
+        }
+
+        .maze-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .maze-grid {
+            display: grid;
+            gap: 4px;
+            background: #e5e5e7;
+            padding: 12px;
+            border-radius: 18px;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .maze-cell {
+            width: 35px;
+            height: 35px;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .maze-cell:hover {
+            transform: scale(1.1);
+            z-index: 2;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .maze-cell.wall {
+            background: var(--text-primary);
+            color: white;
+        }
+
+        .maze-cell.visited {
+            background: var(--accent-purple);
+            color: white;
+            animation: pop 0.3s ease-out;
+        }
+
+        .maze-cell.current {
+            background: var(--accent-amber);
+            transform: scale(1.2);
+            z-index: 5;
+            box-shadow: 0 0 15px rgba(255, 149, 0, 0.4);
+        }
+
+        .maze-cell.start {
+            background: var(--accent-emerald);
+            color: white;
+        }
+
+        .maze-cell.end {
+            background: var(--accent-ruby);
+            color: white;
+        }
+
+        @keyframes pop {
+            0% {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+
+            80% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .controls-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .control-group label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .input-row {
+            display: flex;
+            gap: 1rem;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 1rem;
+            border-radius: 12px;
+            border: 1px solid #e5e5e7;
+            font-size: 1rem;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        input[type="number"]:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
+        }
+
+        .metrics-card {
+            background: var(--bg-accent);
+            padding: 2rem;
+            border-radius: 18px;
+        }
+
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            padding-bottom: 0.5rem;
+        }
+
+        .metric:last-child {
+            border: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .metric-value {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 1000px) {
+
+            .complexity-grid,
+            .demo-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .cheat-sheet {
+                flex-direction: column;
+                text-align: center;
+                gap: 3rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="nav-back">
+        <a href="index.html" class="btn btn-secondary">
+            <i class="fas fa-chevron-left"></i> Back to Maze
+        </a>
+    </nav>
+
+    <div class="container">
+        <header>
+            <h1>Complexity Analysis</h1>
+            <p class="subtitle" style="font-size: 1.5rem; color: var(--text-secondary);">Deep Diving into Depth-First
+                Search Performance</p>
+        </header>
+
+        <section class="complexity-grid">
+            <div class="card">
+                <h2>Time Complexity</h2>
+                <div class="formula time-formula">O(V + E)</div>
+                <p class="description">
+                    In the worst case, DFS visits every vertex <strong>(V)</strong> and explores every edge
+                    <strong>(E)</strong> exactly once. In a grid maze, this translates to exploring all reachable cells.
+                </p>
+            </div>
+            <div class="card">
+                <h2>Space Complexity</h2>
+                <div class="formula space-formula">O(V)</div>
+                <p class="description">
+                    The space required is proportional to the maximum depth of the search tree. In a maze, the recursion
+                    stack can grow up to the total number of vertices <strong>(V)</strong> in a single long path.
+                </p>
+            </div>
+        </section>
+
+        <!-- Big O Chart Section -->
+        <section style="margin-bottom: 5rem; border-radius: 30px; overflow: hidden;">
+            <div style="background: #1a1a2e; padding: 4rem; border-radius: 30px;">
+                <div style="text-align: center; margin-bottom: 2rem;">
+                    <h2 style="font-size: 2.2rem; color: #ffffff; margin-bottom: 0.5rem;">Big O Complexity Chart</h2>
+                    <p style="color: #666; font-size: 1rem;">Comparing growth rates of common algorithm classes</p>
+                </div>
+                <canvas id="bigOChart" style="width: 100%; height: 500px; display: block;"></canvas>
+            </div>
+        </section>
+
+        <script>
+            (function () {
+                const canvas = document.getElementById('bigOChart');
+                const ctx = canvas.getContext('2d');
+
+                function resize() {
+                    const rect = canvas.getBoundingClientRect();
+                    canvas.width = rect.width * 2;
+                    canvas.height = rect.height * 2;
+                    ctx.scale(2, 2);
+                    draw(rect.width, rect.height);
+                }
+
+                function draw(W, H) {
+                    const pad = { top: 45, right: 120, bottom: 50, left: 60 };
+                    const cw = W - pad.left - pad.right;
+                    const ch = H - pad.top - pad.bottom;
+
+                    ctx.clearRect(0, 0, W, H);
+
+                    // Grid
+                    ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+                    ctx.lineWidth = 1;
+                    for (let i = 0; i <= 5; i++) {
+                        const y = pad.top + (ch / 5) * i;
+                        ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left + cw, y); ctx.stroke();
+                    }
+                    for (let i = 0; i <= 5; i++) {
+                        const x = pad.left + (cw / 5) * i;
+                        ctx.beginPath(); ctx.moveTo(x, pad.top); ctx.lineTo(x, pad.top + ch); ctx.stroke();
+                    }
+
+                    // Axes
+                    ctx.strokeStyle = 'rgba(0,255,255,0.35)';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath(); ctx.moveTo(pad.left, pad.top); ctx.lineTo(pad.left, pad.top + ch); ctx.lineTo(pad.left + cw, pad.top + ch); ctx.stroke();
+
+                    // Axis Labels
+                    ctx.fillStyle = '#777';
+                    ctx.font = '13px -apple-system, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('Input Size (n) →', pad.left + cw / 2, pad.top + ch + 40);
+                    ctx.save();
+                    ctx.translate(18, pad.top + ch / 2);
+                    ctx.rotate(-Math.PI / 2);
+                    ctx.fillText('Operations →', 0, 0);
+                    ctx.restore();
+
+                    // Complexity curves — modified so they reach the top y-limit at different x-coordinates
+                    const curves = [
+                        { name: 'O(n!)', color: '#8B00FF', fn: function (t) { return Math.pow(t * 2.5, 5); }, labelOff: { x: -20, y: -20 } },
+                        { name: 'O(2ⁿ)', color: '#FF00FF', fn: function (t) { return Math.pow(t * 1.5, 3.8); }, labelOff: { x: -20, y: -20 } },
+                        { name: 'O(n²)', color: '#FF3366', fn: function (t) { return Math.pow(t * 1.1, 2); }, labelOff: { x: -20, y: -20 } },
+                        { name: 'O(n log n)', color: '#FF9500', fn: function (t) { return t * (0.1 + Math.log(t + 0.01) / Math.log(10) * 0.25); }, labelOff: { x: 14, y: 5 } },
+                        { name: 'O(n)  ← DFS', color: '#FFFF00', fn: function (t) { return t * 0.45; }, labelOff: { x: 14, y: 5 }, highlight: true },
+                        { name: 'O(log n)', color: '#00FF88', fn: function (t) { return Math.log(t * 9 + 1) / Math.log(10) * 0.2; }, labelOff: { x: 14, y: 5 } },
+                        { name: 'O(1)', color: '#00FFCC', fn: function (t) { return 0.04; }, labelOff: { x: 14, y: 5 } },
+                    ];
+
+                    const steps = 300;
+
+                    curves.forEach(function (curve) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = curve.color;
+                        ctx.lineWidth = curve.highlight ? 4 : 2.5;
+                        ctx.shadowColor = curve.color;
+                        ctx.shadowBlur = curve.highlight ? 20 : 10;
+
+                        var lastX, lastY;
+                        for (var i = 0; i <= steps; i++) {
+                            var t = i / steps;
+                            var rawVal = curve.fn(t);
+                            var val = Math.min(rawVal, 1);
+                            var x = pad.left + t * cw;
+                            var y = pad.top + ch - val * ch;
+
+                            if (i === 0) {
+                                ctx.moveTo(x, y);
+                            } else {
+                                ctx.lineTo(x, y);
+                            }
+                            lastX = x;
+                            lastY = y;
+
+                            // Stop plotting if curve hits the top ceiling (rawVal >= 1)
+                            if (rawVal >= 1) break;
+                        }
+                        ctx.stroke();
+                        ctx.shadowBlur = 0;
+
+                        // Glowing endpoint dot
+                        ctx.beginPath();
+                        ctx.arc(lastX, lastY, 7, 0, Math.PI * 2);
+                        ctx.fillStyle = curve.color;
+                        ctx.shadowColor = curve.color;
+                        ctx.shadowBlur = 18;
+                        ctx.fill();
+                        ctx.shadowBlur = 0;
+
+                        // White ring
+                        ctx.beginPath();
+                        ctx.arc(lastX, lastY, 7, 0, Math.PI * 2);
+                        ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+                        ctx.lineWidth = 1.5;
+                        ctx.stroke();
+
+                        // Label — use per-curve offset to avoid overlap
+                        ctx.font = 'bold 13px -apple-system, sans-serif';
+                        ctx.fillStyle = curve.color;
+                        ctx.textAlign = 'left';
+                        ctx.shadowColor = curve.color;
+                        ctx.shadowBlur = 8;
+                        ctx.fillText(curve.name, lastX + curve.labelOff.x, lastY + curve.labelOff.y);
+                        ctx.shadowBlur = 0;
+                    });
+                }
+
+                window.addEventListener('resize', resize);
+                resize();
+            })();
+        </script>
+
+        <!-- DFS Complexity Breakdown -->
+        <section class="card" style="margin-bottom: 5rem; padding: 4rem;">
+            <div style="text-align: center; margin-bottom: 3rem;">
+                <h2 style="font-size: 2rem; margin-bottom: 0.5rem;">How This Relates to Our DFS Maze Solver</h2>
+                <p style="color: var(--text-secondary); font-size: 1.05rem;">The yellow O(n) line on the chart above
+                    represents our algorithm</p>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem;">
+                <div
+                    style="padding: 2.5rem; border-radius: 20px; background: linear-gradient(135deg, rgba(175, 82, 222, 0.08), rgba(175, 82, 222, 0.02)); border: 1px solid rgba(175, 82, 222, 0.15);">
+                    <div
+                        style="font-size: 0.85rem; font-weight: 700; color: var(--accent-purple); letter-spacing: 0.08em; margin-bottom: 1rem;">
+                        ⏱ TIME COMPLEXITY</div>
+                    <div
+                        style="font-size: 3rem; font-weight: 800; margin-bottom: 1.5rem; font-family: ui-monospace, monospace;">
+                        O(V + E)</div>
+                    <ul style="list-style: none; padding: 0; margin: 0; color: var(--text-secondary); line-height: 2;">
+                        <li>✓ <strong>V</strong> = every cell visited once = <strong>Rows × Cols</strong></li>
+                        <li>✓ <strong>E</strong> = every edge (neighbor) checked once = <strong>4 × V</strong> max</li>
+                        <li>✓ Simplifies to <strong>O(n)</strong> where n = grid size</li>
+                        <li>✓ That's the <span style="color: #FFFF00; font-weight: 700;">yellow line</span> on the chart
+                            ↑</li>
+                    </ul>
+                </div>
+                <div
+                    style="padding: 2.5rem; border-radius: 20px; background: linear-gradient(135deg, rgba(0, 113, 227, 0.08), rgba(0, 113, 227, 0.02)); border: 1px solid rgba(0, 113, 227, 0.15);">
+                    <div
+                        style="font-size: 0.85rem; font-weight: 700; color: var(--primary); letter-spacing: 0.08em; margin-bottom: 1rem;">
+                        💾 SPACE COMPLEXITY</div>
+                    <div
+                        style="font-size: 3rem; font-weight: 800; margin-bottom: 1.5rem; font-family: ui-monospace, monospace;">
+                        O(V)</div>
+                    <p
+                        style="color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; font-size: 0.95rem;">
+                        <strong>Why is it O(V)?</strong> Memory is used by the algorithm's recursive "call stack" to
+                        remember the path backwards to the start. In the absolute <strong>worst-case scenario</strong>
+                        (like a maze that is one single long, winding, snake-like corridor with no dead ends), DFS will
+                        travel through every single cell (V) before reaching the target.
+                    </p>
+                    <ul style="list-style: none; padding: 0; margin: 0; color: var(--text-secondary); line-height: 2;">
+                        <li>✓ In this scenario, the stack grows to hold all <strong>V</strong> cells at once.</li>
+                        <li>✓ Thus, peak memory usage scales exactly with the grid size <strong>O(n)</strong>.</li>
+                        <li>✓ Keep an eye on the <strong>Max Stack (Space)</strong> metric in the demo below!</li>
+                    </ul>
+                </div>
+            </div>
+            <div
+                style="margin-top: 3rem; padding: 2rem; background: var(--bg-accent); border-radius: 16px; text-align: center;">
+                <p style="font-size: 1.1rem; color: var(--text-secondary); margin: 0;">💡 <strong>Key Takeaway:</strong>
+                    DFS sits in the <span style="color: #FFFF00; font-weight: 700;">O(n) — Good</span> category. It's
+                    much faster than O(n²) brute-force approaches and scales linearly with grid size. The Interactive
+                    Demo below lets you <strong>see this in action</strong> — watch how Processed (V) grows
+                    proportionally to grid size.</p>
+            </div>
+        </section>
+
+        <section class="cheat-sheet">
+            <div class="cheat-sheet-content">
+                <h2>Formula Cheat Sheet</h2>
+                <ul class="cheat-sheet-list">
+                    <li><i class="fas fa-check-circle"></i> <strong>V</strong> = Number of Nodes (Cells)</li>
+                    <li><i class="fas fa-check-circle"></i> <strong>E</strong> = Number of Edges (Neighbors)</li>
+                    <li><i class="fas fa-check-circle"></i> Average Case: Faster path discovery</li>
+                    <li><i class="fas fa-check-circle"></i> Memory: Depends on Stack Depth</li>
+                </ul>
+            </div>
+            <div class="cheat-sheet-visual">
+                <i class="fas fa-brain"></i>
+            </div>
+        </section>
+
+        <section class="demo-section">
+            <div class="demo-header">
+                <div>
+                    <h2 style="margin: 0; font-size: 2rem;">Interactive Complexity Demo</h2>
+                    <p style="color: var(--text-secondary); margin: 0.5rem 0 0 0;">Visualize how vertices and edges are
+                        processed in real-time.</p>
+                </div>
+                <div style="display: flex; gap: 1rem;">
+                    <button id="start-btn" class="btn btn-primary">
+                        <i class="fas fa-play"></i> Start Analysis
+                    </button>
+                    <button id="reset-btn" class="btn btn-secondary">
+                        <i class="fas fa-redo"></i> Reset
+                    </button>
+                </div>
+            </div>
+
+            <div class="demo-layout">
+                <div class="maze-container">
+                    <div id="maze-grid" class="maze-grid"></div>
+                </div>
+
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label>Grid Dimensions</label>
+                        <div class="input-row">
+                            <input type="number" id="grid-w" value="10" min="5" max="25">
+                            <input type="number" id="grid-h" value="10" min="5" max="25">
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Maze Tools</label>
+                        <button id="clear-walls-btn" class="btn btn-secondary">
+                            <i class="fas fa-eraser"></i> Clear All Walls
+                        </button>
+                        <button id="random-walls-btn" class="btn btn-secondary">
+                            <i class="fas fa-random"></i> Randomize Obstacles
+                        </button>
+                    </div>
+
+                    <div class="metrics-card">
+                        <div class="metric">
+                            <span class="metric-label">Processed (V)</span>
+                            <span id="nodes-visited" class="metric-value">0</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Max Stack (Space)</span>
+                            <span id="max-stack" class="metric-value">0</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Current Depth</span>
+                            <span id="curr-depth" class="metric-value">0</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Status</span>
+                            <span id="status-text" class="metric-value" style="color: var(--primary);">Idle</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        class ComplexitySolver {
+            constructor() {
+                this.width = 10;
+                this.height = 10;
+                this.grid = [];
+                this.isRunning = false;
+                this.visitedCount = 0;
+                this.maxStackDepth = 0;
+
+                this.init();
+            }
+
+            init() {
+                this.gridW = document.getElementById('grid-w');
+                this.gridH = document.getElementById('grid-h');
+                this.mazeGrid = document.getElementById('maze-grid');
+                this.startBtn = document.getElementById('start-btn');
+                this.resetBtn = document.getElementById('reset-btn');
+                this.clearBtn = document.getElementById('clear-walls-btn');
+                this.randomBtn = document.getElementById('random-walls-btn');
+
+                this.gridW.onchange = () => this.resize();
+                this.gridH.onchange = () => this.resize();
+                this.startBtn.onclick = () => this.start();
+                this.resetBtn.onclick = () => this.reset();
+                this.clearBtn.onclick = () => this.clearWalls();
+                this.randomBtn.onclick = () => this.randomWalls();
+
+                this.resize();
+            }
+
+            resize() {
+                this.width = parseInt(this.gridW.value);
+                this.height = parseInt(this.gridH.value);
+                this.reset();
+            }
+
+            reset() {
+                this.isRunning = false;
+                this.visitedCount = 0;
+                this.maxStackDepth = 0;
+                this.updateMetrics();
+
+                this.grid = Array.from({ length: this.height }, (_, y) =>
+                    Array.from({ length: this.width }, (_, x) => ({
+                        type: 'path', visited: false, isStart: x === 0 && y === 0,
+                        isEnd: x === this.width - 1 && y === this.height - 1
+                    }))
+                );
+                this.render();
+                document.getElementById('status-text').textContent = 'Idle';
+                document.getElementById('status-text').style.color = 'var(--text-secondary)';
+            }
+
+            clearWalls() {
+                this.grid.forEach(row => row.forEach(cell => { if (cell.type === 'wall') cell.type = 'path'; }));
+                this.render();
+            }
+
+            randomWalls() {
+                this.grid.forEach(row => row.forEach(cell => {
+                    if (!cell.isStart && !cell.isEnd) {
+                        cell.type = Math.random() < 0.3 ? 'wall' : 'path';
+                    }
+                }));
+                this.render();
+            }
+
+            render() {
+                this.mazeGrid.innerHTML = '';
+                this.mazeGrid.style.gridTemplateColumns = `repeat(${this.width}, 1fr)`;
+
+                for (let y = 0; y < this.height; y++) {
+                    for (let x = 0; x < this.width; x++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'maze-cell';
+                        const data = this.grid[y][x];
+
+                        if (data.isStart) cell.classList.add('start');
+                        else if (data.isEnd) cell.classList.add('end');
+                        else if (data.type === 'wall') cell.classList.add('wall');
+                        else if (data.visited) cell.classList.add('visited');
+
+                        cell.onclick = () => {
+                            if (!this.isRunning && !data.isStart && !data.isEnd) {
+                                data.type = data.type === 'wall' ? 'path' : 'wall';
+                                this.render();
+                            }
+                        };
+                        this.mazeGrid.appendChild(cell);
+                    }
+                }
+            }
+
+            async start() {
+                if (this.isRunning) return;
+                this.isRunning = true;
+                this.visitedCount = 0;
+                this.maxStackDepth = 0;
+                document.getElementById('status-text').textContent = 'Analyzing...';
+                document.getElementById('status-text').style.color = 'var(--primary)';
+
+                const visited = Array.from({ length: this.height }, () => Array(this.width).fill(false));
+
+                const solve = async (x, y, depth) => {
+                    if (!this.isRunning) return false;
+                    if (x < 0 || x >= this.width || y < 0 || y >= this.height || this.grid[y][x].type === 'wall' || visited[y][x]) return false;
+
+                    visited[y][x] = true;
+                    this.grid[y][x].visited = true;
+                    this.visitedCount++;
+                    this.maxStackDepth = Math.max(this.maxStackDepth, depth);
+
+                    this.updateMetrics(depth);
+                    this.renderCurrent(x, y);
+
+                    await new Promise(r => setTimeout(r, 100));
+
+                    if (x === this.width - 1 && y === this.height - 1) return true;
+
+                    const neighbors = [[0, 1], [1, 0], [0, -1], [-1, 0]];
+                    for (const [dx, dy] of neighbors) {
+                        if (await solve(x + dx, y + dy, depth + 1)) return true;
+                    }
+
+                    // Backtracking: Update current depth indicator
+                    if (this.isRunning) {
+                        this.updateMetrics(depth - 1);
+                    }
+                    return false;
+                };
+
+                const found = await solve(0, 0, 1);
+                this.isRunning = false;
+                document.getElementById('status-text').textContent = found ? 'Path Found' : 'No Path';
+                document.getElementById('status-text').style.color = found ? 'var(--accent-emerald)' : 'var(--accent-ruby)';
+                this.render();
+            }
+
+            renderCurrent(x, y) {
+                const cells = this.mazeGrid.children;
+                const index = y * this.width + x;
+                // Remove previous current
+                const prev = this.mazeGrid.querySelector('.current');
+                if (prev) prev.classList.remove('current');
+                cells[index].classList.add('current');
+                cells[index].classList.add('visited');
+            }
+
+            updateMetrics(depth = 0) {
+                document.getElementById('nodes-visited').textContent = this.visitedCount;
+                document.getElementById('max-stack').textContent = this.maxStackDepth;
+                document.getElementById('curr-depth').textContent = depth;
+            }
+        }
+
+        new ComplexitySolver();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maze Solver - DFS & Backtracking Algorithms</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Maze Solver: Depth-First Search</h1>
+            <p class="subtitle">Recursive pathfinding visualization for presentation</p>
+            <div style="margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                <a href="complexity_analysis.html" class="btn btn-primary"
+                    style="background: var(--accent-purple); text-decoration: none;">
+                    <i class="fas fa-chart-pie"></i> Complexity Analysis Presentation
+                </a>
+                <a href="dfs_tree.html" class="btn btn-primary"
+                    style="background: var(--accent-emerald); text-decoration: none;">
+                    <i class="fas fa-project-diagram"></i> DFS Tree Visualization
+                </a>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <!-- Maze Section with Controls -->
+            <div class="maze-section">
+                <!-- Left Side - Maze Grid -->
+                <div class="maze-container">
+                    <div class="maze-legend">
+                        <div class="legend-item">
+                            <div class="legend-color start"></div>
+                            <span>Start</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color end"></div>
+                            <span>End</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color wall"></div>
+                            <span>Wall</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color visited"></div>
+                            <span>Explored</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color current"></div>
+                            <span>Current</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color solution"></div>
+                            <span>Shortest Path</span>
+                        </div>
+                    </div>
+                    <div id="maze-grid" class="maze-grid"></div>
+                </div>
+
+                <!-- Right Side - Control Panels -->
+                <div class="right-controls">
+                    <!-- Algorithm Controls -->
+                    <div class="panel algorithm-controls">
+                        <h3>DFS Controls</h3>
+                        <div class="button-row">
+                            <button id="start-btn" class="btn btn-primary">
+                                <i class="fas fa-play"></i> Start DFS
+                            </button>
+                            <button id="step-btn" class="btn btn-secondary">
+                                <i class="fas fa-step-forward"></i> Single Step
+                            </button>
+                        </div>
+                        <div class="button-row">
+                            <button id="reset-btn" class="btn btn-danger">
+                                <i class="fas fa-redo"></i> Reset
+                            </button>
+                            <button id="new-maze-btn" class="btn btn-secondary">
+                                <i class="fas fa-plus"></i> New Maze
+                            </button>
+                        </div>
+
+                        <div class="control-group" style="display: none;">
+                            <label for="algorithm-select">Algorithm Type</label>
+                            <select id="algorithm-select">
+                                <option value="dfs" selected>DFS (Depth First Search)</option>
+                                <option value="backtrack">Backtracking (Recursive)</option>
+                            </select>
+                        </div>
+
+                        <div class="control-group">
+                            <label for="speed-slider">Animation Speed</label>
+                            <input type="range" id="speed-slider" min="1" max="10" value="5" class="speed-slider">
+                            <div class="speed-labels">
+                                <span>Slow</span>
+                                <span>Fast</span>
+                            </div>
+                        </div>
+
+                        <!-- Direction Priority -->
+                        <div class="control-group direction-priority-group">
+                            <label><i class="fas fa-compass"></i> Direction Priority</label>
+                            <p class="priority-hint">DFS tries directions in this order. Drag or use arrows to reorder.
+                            </p>
+                            <div id="direction-priority-list" class="direction-priority-list">
+                                <div class="direction-item" data-dir="down" draggable="true">
+                                    <span class="dir-rank">1</span>
+                                    <span class="dir-icon"><i class="fas fa-arrow-down"></i></span>
+                                    <span class="dir-label">Down</span>
+                                    <span class="dir-arrows">
+                                        <button class="dir-move-btn" data-move="up"><i
+                                                class="fas fa-chevron-up"></i></button>
+                                        <button class="dir-move-btn" data-move="down"><i
+                                                class="fas fa-chevron-down"></i></button>
+                                    </span>
+                                </div>
+                                <div class="direction-item" data-dir="right" draggable="true">
+                                    <span class="dir-rank">2</span>
+                                    <span class="dir-icon"><i class="fas fa-arrow-right"></i></span>
+                                    <span class="dir-label">Right</span>
+                                    <span class="dir-arrows">
+                                        <button class="dir-move-btn" data-move="up"><i
+                                                class="fas fa-chevron-up"></i></button>
+                                        <button class="dir-move-btn" data-move="down"><i
+                                                class="fas fa-chevron-down"></i></button>
+                                    </span>
+                                </div>
+                                <div class="direction-item" data-dir="up" draggable="true">
+                                    <span class="dir-rank">3</span>
+                                    <span class="dir-icon"><i class="fas fa-arrow-up"></i></span>
+                                    <span class="dir-label">Up</span>
+                                    <span class="dir-arrows">
+                                        <button class="dir-move-btn" data-move="up"><i
+                                                class="fas fa-chevron-up"></i></button>
+                                        <button class="dir-move-btn" data-move="down"><i
+                                                class="fas fa-chevron-down"></i></button>
+                                    </span>
+                                </div>
+                                <div class="direction-item" data-dir="left" draggable="true">
+                                    <span class="dir-rank">4</span>
+                                    <span class="dir-icon"><i class="fas fa-arrow-left"></i></span>
+                                    <span class="dir-label">Left</span>
+                                    <span class="dir-arrows">
+                                        <button class="dir-move-btn" data-move="up"><i
+                                                class="fas fa-chevron-up"></i></button>
+                                        <button class="dir-move-btn" data-move="down"><i
+                                                class="fas fa-chevron-down"></i></button>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Maze Tools -->
+                    <div class="panel maze-tools">
+                        <h3>Maze Tools</h3>
+                        <div class="size-controls">
+                            <div class="size-input">
+                                <label for="width-input">Width</label>
+                                <input type="number" id="width-input" value="20" min="3" max="30">
+                            </div>
+                            <div class="size-input">
+                                <label for="height-input">Height</label>
+                                <input type="number" id="height-input" value="20" min="3" max="30">
+                            </div>
+                        </div>
+
+                        <button id="generate-maze-btn" class="btn btn-secondary full-width">
+                            Generate Random Maze
+                        </button>
+                        <button id="clear-maze-btn" class="btn btn-secondary full-width">
+                            Clear Maze
+                        </button>
+                        <button id="weakness-btn" class="btn btn-secondary full-width"
+                            style="margin-top: 0.5rem; border: 1px solid var(--accent-ruby); color: var(--accent-ruby);">
+                            <i class="fas fa-biohazard"></i> DFS Weakness Demo
+                        </button>
+
+                        <div class="edit-mode">
+                            <label>
+                                <input type="checkbox" id="edit-mode-checkbox">
+                                Edit Mode (click to toggle walls)
+                            </label>
+                        </div>
+
+                        <div class="file-controls">
+                            <button id="save-maze-btn" class="btn btn-secondary full-width">
+                                Save Maze
+                            </button>
+                            <button id="load-maze-btn" class="btn btn-secondary full-width">
+                                Load Maze
+                            </button>
+                            <button id="download-files-btn" class="btn btn-secondary full-width">
+                                Download Project Files
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Section - Status and Info Panels -->
+            <div class="bottom-panels">
+                <!-- Stack State -->
+                <div class="panel stack-state">
+                    <h3>Stack State</h3>
+                    <div id="stack-content" class="stack-content">
+                        <p class="empty-state">Stack is empty</p>
+                    </div>
+                </div>
+
+                <!-- How it Works -->
+                <div class="panel how-it-works">
+                    <h3>The DFS Algorithm</h3>
+                    <div class="algorithm-info">
+                        <p><strong>1. Depth First Search:</strong> Explores a branch as deep as possible before
+                            backtracking.</p>
+                        <p><strong>2. Implicit Stack:</strong> Uses the system's Call Stack via recursion to remember
+                            the path.</p>
+                        <p><strong>3. Time Complexity:</strong> O(V + E) where V is vertices and E is edges.</p>
+                        <p><strong>4. Space Complexity:</strong> O(V) due to the recursive stack depth.</p>
+                    </div>
+                </div>
+
+                <!-- Algorithm Status -->
+                <div class="panel algorithm-status">
+                    <h3>Algorithm Status</h3>
+                    <div class="status-row">
+                        <span class="status-label">Status:</span>
+                        <span id="algorithm-status" class="status-value">Ready</span>
+                    </div>
+                    <div class="status-row">
+                        <span class="status-label">Current Cell:</span>
+                        <span id="current-cell" class="status-value">None</span>
+                    </div>
+                    <div class="status-row">
+                        <span class="status-label">Stack Size:</span>
+                        <span id="stack-size" class="status-value">0</span>
+                    </div>
+                    <div class="status-row">
+                        <span class="status-label">Cells Visited:</span>
+                        <span id="cells-visited" class="status-value">0</span>
+                    </div>
+                    <div class="status-row">
+                        <span class="status-label">Solution Found:</span>
+                        <span id="solution-found" class="status-value">No</span>
+                    </div>
+                </div>
+
+                <!-- Performance Metrics -->
+                <div class="panel performance-metrics">
+                    <h3>Performance Metrics</h3>
+                    <div class="metric-row">
+                        <span class="metric-label">Cells Visited:</span>
+                        <span id="perf-cells-visited" class="metric-value">0</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Algorithm Steps:</span>
+                        <span id="perf-steps" class="metric-value">0</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Path Length:</span>
+                        <span id="perf-path-length" class="metric-value">0</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Time:</span>
+                        <span id="perf-time" class="metric-value">0.00s</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Steps:</span>
+                        <span id="perf-total-steps" class="metric-value">0</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Path Length:</span>
+                        <span id="perf-final-path" class="metric-value">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden file input for loading mazes -->
+    <input type="file" id="file-input" accept=".json" style="display: none;">
+
+    <script src="script.js"></script>
+</body>
+
+</html>

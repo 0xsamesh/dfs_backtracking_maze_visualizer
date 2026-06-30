@@ -1,0 +1,33 @@
+# ---- Node ----
+node_modules/
+npm-debug.log*
+
+# ---- Compiled C++ binaries (regenerable via algorithms/compile.sh) ----
+*.exe
+*.o
+*.out
+main_solver
+dfs_solver
+backtrack_solver
+temp_maze.json
+
+# ---- Docs & notes: keep locally, do NOT push ----
+*.pdf
+*.docx
+*.pptx
+*.rar
+*.zip
+# keep README.md (repo front page); ignore all other markdown
+*.md
+!README.md
+
+# ---- Replit / platform junk ----
+.replit
+replit.md
+replit.nix
+
+# ---- OS / editor cruft ----
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
